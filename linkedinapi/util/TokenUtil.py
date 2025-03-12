@@ -1,5 +1,7 @@
-import jwt
 import datetime
+
+import jwt
+from fastapi.security import HTTPAuthorizationCredentials
 
 SECRET_KEY = "your_secret_key"  # Replace with a secure secret key
 
@@ -23,7 +25,7 @@ class TokenUtil:
         return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
     
     @staticmethod
-    def decode_token(token: str) -> str:
+    def decode_token(token: HTTPAuthorizationCredentials) -> str:
         """
         Decode a JWT token to extract the username.
         
@@ -34,7 +36,7 @@ class TokenUtil:
             The username extracted from the token
         """
         try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            payload = jwt.decode(token.credentials, SECRET_KEY, algorithms=["HS256"])
             return payload["username"]
         except jwt.ExpiredSignatureError:
             raise Exception("Token has expired")
