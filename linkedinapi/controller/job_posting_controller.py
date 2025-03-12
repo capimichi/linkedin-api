@@ -1,12 +1,10 @@
 from fastapi import APIRouter, HTTPException, Depends
-from fastapi.security import OAuth2PasswordBearer
 from linkedinapi.container.DefaultContainer import DefaultContainer
 from linkedinapi.service.JobPostingService import JobPostingService
 from linkedinapi.model.JobPostingRequest import JobPostingRequest
 from linkedinapi.model.JobPostingInfo import JobPostingInfo
 from linkedinapi.util.TokenUtil import TokenUtil
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+from linkedinapi.controller import security_scheme
 
 job_posting_controller = APIRouter(
     prefix="/jobs",
@@ -14,7 +12,7 @@ job_posting_controller = APIRouter(
 )
 
 @job_posting_controller.get("/{job_id}")
-async def get_job_details(job_id: str, token: str = Depends(oauth2_scheme)):
+async def get_job_details(job_id: str, token: str = Depends(security_scheme)):
     """
     Get detailed information about a specific job posting.
     
@@ -40,7 +38,7 @@ async def get_job_details(job_id: str, token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=500, detail=f"Error retrieving job details: {str(e)}")
 
 @job_posting_controller.post("/details")
-async def get_job_details_by_post(request: JobPostingRequest, token: str = Depends(oauth2_scheme)):
+async def get_job_details_by_post(request: JobPostingRequest, token: str = Depends(security_scheme)):
     """
     Get detailed information about a job posting using POST request.
     
@@ -53,6 +51,7 @@ async def get_job_details_by_post(request: JobPostingRequest, token: str = Depen
     """
     try:
         username = TokenUtil.decode_token(token)
+        print(username)
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
     
