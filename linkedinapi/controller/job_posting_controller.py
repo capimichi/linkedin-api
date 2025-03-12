@@ -12,7 +12,7 @@ job_posting_controller = APIRouter(
 )
 
 @job_posting_controller.get("/{job_id}")
-async def get_job_details(job_id: str, token: str = Depends(security_scheme)):
+async def get_job_details(job_id: int, token: str = Depends(security_scheme)) -> JobPostingInfo:
     """
     Get detailed information about a specific job posting.
     
@@ -32,7 +32,7 @@ async def get_job_details(job_id: str, token: str = Depends(security_scheme)):
     job_posting_service: JobPostingService = default_container.get(JobPostingService)
     
     try:
-        job_details = job_posting_service.get_job_details(username, job_id)
+        job_details = await job_posting_service.get_job_details(username, job_id)
         return job_details
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving job details: {str(e)}")
