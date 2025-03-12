@@ -5,20 +5,21 @@ import jwt
 class TokenHelper:
     
     @staticmethod
-    def generate_token(username: str, secret_key: str) -> str:
+    def generate_token(username: str, secret_key: str, duration_hours: int = 1) -> str:
         """
         Generate a JWT token for the given username.
         
         Args:
             username: The username to include in the token
             secret_key: The secret key to use for encoding the token
+            duration_hours: The duration in hours for which the token is valid
             
         Returns:
             A JWT token as a string
         """
         payload = {
             "username": username,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)  # Token expires in 1 hour
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=duration_hours)  # Token expires in 1 hour
         }
         return jwt.encode(payload, secret_key, algorithm="HS256")
     
