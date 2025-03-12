@@ -6,7 +6,7 @@ from linkedinapi.helper.TokenHelper import TokenHelper
 from linkedinapi.service.JobPostingService import JobPostingService
 from linkedinapi.model.JobPostingRequest import JobPostingRequest
 from linkedinapi.model.JobPostingInfo import JobPostingInfo
-from linkedinapi.controller import security_scheme, get_current_username
+from linkedinapi.controller import get_current_username
 
 job_posting_controller = APIRouter(
     prefix="/jobs",
