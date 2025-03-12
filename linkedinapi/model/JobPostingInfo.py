@@ -5,7 +5,7 @@ class JobPostingInfo(BaseModel):
     """
     Model representing detailed information about a job posting from LinkedIn.
     """
-    id: str
+    id: Optional[int] = None
     title: Optional[str] = None
     company_name: Optional[str] = None
     company_slug: Optional[str] = None
