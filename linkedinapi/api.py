@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 import uvicorn
+from starlette.responses import RedirectResponse
 
 from linkedinapi.container.DefaultContainer import DefaultContainer
 from linkedinapi.controller.login_controller import login_controller
@@ -20,7 +21,8 @@ app = FastAPI(
 # Root endpoint
 @app.get("/")
 async def root():
-    return {"message": "LinkedIn API is running"}
+    # please redirect to the documentation
+    return RedirectResponse(url="/docs")
 
 # Health check endpoint
 @app.get("/health")
