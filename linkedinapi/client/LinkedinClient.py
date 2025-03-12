@@ -1,5 +1,10 @@
+import asyncio
+
 from injector import inject
 from typing import List, Optional, Any
+
+from playwright.async_api import async_playwright
+
 from linkedinapi.model.JobPostingListingItem import JobPostingListingItem
 from linkedinapi.variable.SessionDirVariable import SessionDirVariable
 from playwright.sync_api import sync_playwright, Browser, BrowserContext, Page
@@ -73,7 +78,15 @@ class LinkedinClient:
         
         return False
 
+
+
     def search(self, username: str, query: str, location: str, limit_first_page: bool = False, 
+               filter_date: Optional[int] = None) -> List[JobPostingListingItem]:
+        loop = asyncio.get_event_loop()
+        return loop.run_until_complete(self._search(username, query, location, limit_first_page, filter_date))
+
+
+    async def _search(self, username: str, query: str, location: str, limit_first_page: bool = False,
                filter_date: Optional[int] = None) -> List[JobPostingListingItem]:
         """
         Search for job listings on LinkedIn with specified criteria.
@@ -88,56 +101,56 @@ class LinkedinClient:
         Returns:
             List of job posting items matching the search criteria
         """
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=self.headless)
-            session = browser.new_context(storage_state=self.get_session_path(username))
-            page = session.new_page()
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=self.headless)
+            session = await browser.new_context(storage_state=self.get_session_path(username))
+            page = await session.new_page()
 
             # Navigate to LinkedIn jobs page
             jobs_url = "https://www.linkedin.com/jobs/"
-            page.goto(jobs_url)
+            await page.goto(jobs_url)
 
             # Fill in job search query
             search_selector = 'input[aria-label="Cerca per qualifica, competenza o azienda"]'
-            page.wait_for_selector(search_selector)
-            page.fill(search_selector, query)
+            await page.wait_for_selector(search_selector)
+            await page.fill(search_selector, query)
 
-            page.wait_for_timeout(500)
+            await page.wait_for_timeout(500)
 
             # Fill in location
             location_selector = 'input[aria-label="Città, stato o CAP"]'
-            page.wait_for_selector(location_selector)
-            page.fill(location_selector, location)
+            await page.wait_for_selector(location_selector)
+            await page.fill(location_selector, location)
 
-            page.wait_for_timeout(500)
+            await page.wait_for_timeout(500)
 
             # Submit search
-            page.keyboard.press('Enter')
-            page.wait_for_timeout(5000)
+            await page.keyboard.press('Enter')
+            await page.wait_for_timeout(5000)
 
             # Apply date filter if specified
             if filter_date:
                 # Click on the date filter dropdown
-                page.click("#searchFilter_timePostedRange")
-                page.wait_for_timeout(1500)
+                await page.click("#searchFilter_timePostedRange")
+                await page.wait_for_timeout(1500)
 
                 # Navigate to the filter options
                 for i in range(2):
-                    page.keyboard.press('Tab')
-                    page.wait_for_timeout(500)
+                    await page.keyboard.press('Tab')
+                    await page.wait_for_timeout(500)
 
                 # Select the appropriate date filter option
                 for i in range(filter_date):
-                    page.keyboard.press('ArrowDown')
-                    page.wait_for_timeout(500)
+                    await page.keyboard.press('ArrowDown')
+                    await page.wait_for_timeout(500)
 
                 # Apply the filter
                 for i in range(2):
-                    page.keyboard.press('Tab')
-                    page.wait_for_timeout(500)
+                    await page.keyboard.press('Tab')
+                    await page.wait_for_timeout(500)
 
-                page.keyboard.press('Enter')
-                page.wait_for_timeout(1500)
+                await page.keyboard.press('Enter')
+                await page.wait_for_timeout(1500)
 
             has_next_page = True
             job_postings = []
@@ -146,51 +159,51 @@ class LinkedinClient:
             while has_next_page:
                 # Scroll inside the job listings container to load all jobs
                 scroll_container_selector = '.scaffold-layout__list'
-                page.wait_for_selector(scroll_container_selector)
-                scroll_container_x = page.query_selector(scroll_container_selector).bounding_box()['x']
-                scroll_container_y = page.query_selector(scroll_container_selector).bounding_box()['y']
+                await page.wait_for_selector(scroll_container_selector)
+                scroll_container_x = (await page.query_selector(scroll_container_selector)).bounding_box()['x']
+                scroll_container_y = (await page.query_selector(scroll_container_selector)).bounding_box()['y']
 
-                page.mouse.move(scroll_container_x + 100, scroll_container_y + 100)
-                page.wait_for_timeout(1500)
+                await page.mouse.move(scroll_container_x + 100, scroll_container_y + 100)
+                await page.wait_for_timeout(1500)
 
                 # Scroll down multiple times to ensure all content is loaded
                 for i in range(8):
-                    page.mouse.wheel(0, 400)
-                    page.wait_for_timeout(500)
+                    await page.mouse.wheel(0, 400)
+                    await page.wait_for_timeout(500)
 
                 # Select job card elements
                 job_card_selector = '.job-card-container'
                 job_footer_item_selector = '.job-card-container__footer-item time'
                             
-                page.wait_for_selector(job_card_selector)
-                page.wait_for_selector(job_footer_item_selector)
+                await page.wait_for_selector(job_card_selector)
+                await page.wait_for_selector(job_footer_item_selector)
                 
-                job_cards = page.query_selector_all(job_card_selector)
+                job_cards = await page.query_selector_all(job_card_selector)
 
                 # Extract data from each job card
                 for job_card in job_cards:
                     job_posting = JobPostingListingItem()
                     
                     # Extract job ID
-                    job_id = job_card.get_attribute('data-job-id')
+                    job_id = await job_card.get_attribute('data-job-id')
                     job_posting.id = job_id
                     
                     # Extract job title
-                    job_title = job_card.query_selector('strong').inner_text().strip()
+                    job_title = (await job_card.query_selector('strong')).inner_text().strip()
                     job_posting.title = job_title
 
                     # Extract company name
-                    job_company = job_card.query_selector('.artdeco-entity-lockup__subtitle').inner_text().strip()
+                    job_company = (await job_card.query_selector('.artdeco-entity-lockup__subtitle')).inner_text().strip()
                     job_posting.company_name = job_company
 
                     # Extract datetime using regex
-                    match = re.search(r'<time datetime="(.*?)"', job_card.inner_html())
+                    match = re.search(r'<time datetime="(.*?)"', await job_card.inner_html())
                     if match:
                         job_date = match.group(1)
                         job_posting.created_at = job_date
 
                     # Check if the job has simple application
-                    is_simple = job_card.inner_text().find('Candidatura semplice') != -1
+                    is_simple = (await job_card.inner_text()).find('Candidatura semplice') != -1
                     job_posting.is_simple = is_simple
 
                     job_postings.append(job_posting)
@@ -200,12 +213,12 @@ class LinkedinClient:
                     has_next_page = False
                 else:
                     next_page_selector = 'button[aria-label="Visualizza pagina successiva"]'
-                    has_next_page = page.query_selector(next_page_selector) is not None
+                    has_next_page = await page.query_selector(next_page_selector) is not None
                     if has_next_page:
-                        page.click(next_page_selector)
-                        page.wait_for_timeout(1000)
+                        await page.click(next_page_selector)
+                        await page.wait_for_timeout(1000)
 
-            browser.close()
+            await browser.close()
             return job_postings
             
     def get_job_posting_info(self, username: str, job_id: str) -> Any:  # Return should be JobPostingInfo, needs import
