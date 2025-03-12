@@ -5,6 +5,7 @@ import os
 from injector import Injector
 from dotenv import load_dotenv
 
+from linkedinapi.variable.SecretKeyVariable import SecretKeyVariable
 from linkedinapi.variable.SessionDirVariable import SessionDirVariable
 from linkedinapi.service.JobPostingService import JobPostingService
 from linkedinapi.client.LinkedinClient import LinkedinClient
@@ -51,6 +52,7 @@ class DefaultContainer:
         self.pandoc_executable = os.environ.get('PANDOC_EXECUTABLE', 'pandoc')
         self.api_host = os.environ.get('API_HOST', '0.0.0.0')
         self.api_port = int(os.environ.get('API_PORT', 8000))
+        self.secret_key = os.environ.get('SECRET_KEY')
 
     def _init_logging(self):
         logging.basicConfig(filename=self.app_log_path, level=logging.INFO, filemode='a', format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s', datefmt='%H:%M:%S')
@@ -59,3 +61,4 @@ class DefaultContainer:
         self.injector.binder.bind(SessionDirVariable, SessionDirVariable(self.session_dir))
         self.injector.binder.bind(LinkedinClient, to=LinkedinClient)
         self.injector.binder.bind(JobPostingService, to=JobPostingService)
+        self.injector.binder.bind(SecretKeyVariable, to=SecretKeyVariable(self.secret_key))
