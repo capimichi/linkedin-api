@@ -1,6 +1,9 @@
 from typing import List, Optional
 from pydantic import BaseModel
 
+from linkedinapi.model.Hirer import Hirer
+
+
 class JobPostingInfo(BaseModel):
     """
     Model representing detailed information about a job posting from LinkedIn.
@@ -15,5 +18,7 @@ class JobPostingInfo(BaseModel):
     is_simple: bool = False
     external_url: Optional[str] = None
     disabled: bool = False
+
+    hirers: List[Hirer] = []
 
 
