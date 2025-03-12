@@ -24,7 +24,11 @@ class LoginService:
         """
         try:
             self.linkedin_client.login(username, password)
-            token = TokenHelper.generate_token(username, self.secret_manager.get_secret_key())
+            token = TokenHelper.generate_token(
+                username,
+                self.secret_manager.get_secret_key(),
+                24
+            )
             return {"status": "success", "token": token}
         except Exception as e:
             return {"status": "error", "message": str(e)}
