@@ -1,0 +1,2 @@
+class SessionDirVariable(str):
+    pass
