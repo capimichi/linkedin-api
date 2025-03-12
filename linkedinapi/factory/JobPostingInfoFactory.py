@@ -5,6 +5,7 @@ class JobPostingInfoFactory:
     @staticmethod
     async def create_from_job_posting_single_page(job_posting_single_page: JobPostingSinglePage) -> JobPostingInfo:
         job_posting_info = JobPostingInfo()
+        job_posting_info.id = await job_posting_single_page.get_id()
         job_posting_info.title = await job_posting_single_page.get_title()
         job_posting_info.location = await job_posting_single_page.get_location()
         job_posting_info.description = await job_posting_single_page.get_description()
