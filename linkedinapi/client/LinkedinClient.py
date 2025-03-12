@@ -5,6 +5,7 @@ from typing import List, Optional, Any
 
 from playwright.async_api import async_playwright
 
+from linkedinapi.model.JobPostingInfo import JobPostingInfo
 from linkedinapi.model.JobPostingListingItem import JobPostingListingItem
 from linkedinapi.variable.SessionDirVariable import SessionDirVariable
 from playwright.sync_api import sync_playwright, Browser, BrowserContext, Page
@@ -220,8 +221,8 @@ class LinkedinClient:
 
             await browser.close()
             return job_postings
-            
-    def get_job_posting_info(self, username: str, job_id: str) -> Any:  # Return should be JobPostingInfo, needs import
+
+    async def get_job_posting_info(self, username: str, job_id: int) -> Optional[JobPostingInfo]:  # Return should be JobPostingInfo, needs import
         """
         Get detailed information about a specific job posting.
         
@@ -232,61 +233,61 @@ class LinkedinClient:
         Returns:
             JobPostingInfo object containing detailed job information
         """
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=self.headless)
-            session = browser.new_context(storage_state=self.get_session_path(username))
-            page = session.new_page()
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=self.headless)
+            session = await browser.new_context(storage_state=self.get_session_path(username))
+            page = await session.new_page()
 
             # Navigate to job posting page
             job_url = f"https://www.linkedin.com/jobs/view/{job_id}/"
-            page.goto(job_url)
+            await page.goto(job_url)
 
             job_posting = JobPostingInfo()  # This class needs to be imported
             job_posting.id = job_id
 
             # Check if job posting is not found
             job_not_found_selector = '.jobs-no-job__error-msg'
-            if(page.query_selector(job_not_found_selector)):
+            if await page.query_selector(job_not_found_selector):
                 job_posting.disabled = True
-                browser.close()
+                await browser.close()
                 return job_posting
 
             # Extract job title
             job_title_selector = '.artdeco-card h1'
             try:
-                page.wait_for_selector(job_title_selector, timeout=1000)
-                job_posting.title = page.query_selector(job_title_selector).inner_text().strip()
+                await page.wait_for_selector(job_title_selector, timeout=1000)
+                job_posting.title = (await page.query_selector(job_title_selector)).inner_text().strip()
             except Exception as e:
                 pass
 
             # Extract job location
             job_location_selector = '.job-details-jobs-unified-top-card__primary-description-container .tvm__text:first-child'
             try:
-                page.wait_for_selector(job_location_selector, timeout=1000)
-                job_posting.location = page.query_selector(job_location_selector).inner_text().strip()
+                await page.wait_for_selector(job_location_selector, timeout=1000)
+                job_posting.location = (await page.query_selector(job_location_selector)).inner_text().strip()
             except Exception as e:
                 pass
 
             # Extract job description
             job_description_selector = '.jobs-box__html-content p'
             try:
-                page.wait_for_selector(job_description_selector, timeout=1000)
-                job_posting.description = page.query_selector(job_description_selector).inner_text().strip()
+                await page.wait_for_selector(job_description_selector, timeout=1000)
+                job_posting.description = (await page.query_selector(job_description_selector)).inner_text().strip()
             except Exception as e:
                 pass
 
             # Extract required skills
             job_skills_selector = '.job-details-how-you-match__skills-item-subtitle'
             try:
-                page.wait_for_selector(job_skills_selector, timeout=1000)
-                job_skills_objects = page.query_selector_all(job_skills_selector)
+                await page.wait_for_selector(job_skills_selector, timeout=1000)
+                job_skills_objects = await page.query_selector_all(job_skills_selector)
             except Exception as e:
                 job_skills_objects = []
 
             # Process and normalize skills list
             skills = []
             for job_skills_object in job_skills_objects:
-                job_skills = job_skills_object.inner_text().strip()
+                job_skills = (await job_skills_object.inner_text()).strip()
                 job_skills = job_skills.split(',')
                 for job_skill in job_skills:
                     is_last_skill = job_skill == job_skills[-1]
@@ -301,10 +302,10 @@ class LinkedinClient:
             # Extract additional skills
             additional_skills_selector = '.job-details-how-you-match__skills-section-descriptive-skill'
             try:
-                page.wait_for_selector(additional_skills_selector, timeout=1000)
-                additional_skills_object = page.query_selector(additional_skills_selector)
+                await page.wait_for_selector(additional_skills_selector, timeout=1000)
+                additional_skills_object = await page.query_selector(additional_skills_selector)
                 if additional_skills_object:
-                    additional_skills = additional_skills_object.inner_text().strip()
+                    additional_skills = (await additional_skills_object.inner_text()).strip()
                     additional_skills = additional_skills.split('·')
                     for additional_skill in additional_skills:
                         skills.append(additional_skill.strip())
@@ -316,9 +317,9 @@ class LinkedinClient:
             # Extract company information
             company_url_selector = '.job-details-jobs-unified-top-card__company-name a'
             try:
-                page.wait_for_selector(company_url_selector, timeout=1000)
-                company_name = page.query_selector(company_url_selector).inner_text().strip()
-                company_url = page.query_selector(company_url_selector).get_attribute('href')
+                await page.wait_for_selector(company_url_selector, timeout=1000)
+                company_name = (await page.query_selector(company_url_selector)).inner_text().strip()
+                company_url = (await page.query_selector(company_url_selector)).get_attribute('href')
                 # Extract company slug from URL
                 company_slug = company_url.split('company/')[1].split('/')[0]
                 job_posting.company_slug = company_slug
@@ -329,8 +330,8 @@ class LinkedinClient:
             # Check if job listing is disabled
             is_disabled = False
             job_disabled_selector = '.artdeco-inline-feedback__message'
-            if(page.query_selector(job_disabled_selector)):
-                job_disabled_text = page.query_selector(job_disabled_selector).inner_text().strip().lower()
+            if await page.query_selector(job_disabled_selector):
+                job_disabled_text = (await page.query_selector(job_disabled_selector)).inner_text().strip().lower()
                 is_disabled = job_disabled_text.find('non accetta') != -1
             
             job_posting.disabled = is_disabled
@@ -339,18 +340,18 @@ class LinkedinClient:
             if not is_disabled:
                 job_external_button_selector = '.jobs-apply-button--top-card .jobs-apply-button'
                 try:
-                    page.wait_for_selector(job_external_button_selector, timeout=1000)
-                    if page.query_selector(job_external_button_selector):
-                        job_external_button_text = page.query_selector(job_external_button_selector).inner_text().strip()
+                    await page.wait_for_selector(job_external_button_selector, timeout=1000)
+                    if await page.query_selector(job_external_button_selector):
+                        job_external_button_text = (await page.query_selector(job_external_button_selector)).inner_text().strip()
                         # Check if it's a simple application (keyword "semplice")
                         job_posting.is_simple = job_external_button_text.find('semplice') != -1
                 except Exception as e:
                     pass
             
                 # Get external URL for non-simple applications
-                if (not job_posting.is_simple):
-                    page.click(job_external_button_selector)
-                    page.wait_for_timeout(5000)
+                if not job_posting.is_simple:
+                    await page.click(job_external_button_selector)
+                    await page.wait_for_timeout(5000)
 
                     # Check if application opened in a new tab
                     if len(page.context.pages) > 1:
@@ -361,7 +362,7 @@ class LinkedinClient:
                     
                     job_posting.external_url = external_url
 
-            browser.close()
+            await browser.close()
             return job_posting
 
     def login(self, username: str, password: str) -> None:
