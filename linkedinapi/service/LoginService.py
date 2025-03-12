@@ -1,12 +1,15 @@
 from injector import inject
-from linkedinapi.util.TokenUtil import TokenUtil
 from linkedinapi.client.LinkedinClient import LinkedinClient
+from linkedinapi.helper.TokenHelper import TokenHelper
+from linkedinapi.manager.SecretManager import SecretManager
+
 
 class LoginService:
 
     @inject
-    def __init__(self, linkedin_client: LinkedinClient):
+    def __init__(self, linkedin_client: LinkedinClient, secret_manager: SecretManager):
         self.linkedin_client = linkedin_client
+        self.secret_manager = secret_manager
         
     def login(self, username: str, password: str):
         """
@@ -21,7 +24,7 @@ class LoginService:
         """
         try:
             self.linkedin_client.login(username, password)
-            token = TokenUtil.generate_token(username)
+            token = TokenHelper.generate_token(username, self.secret_manager.get_secret_key())
             return {"status": "success", "token": token}
         except Exception as e:
             return {"status": "error", "message": str(e)}
