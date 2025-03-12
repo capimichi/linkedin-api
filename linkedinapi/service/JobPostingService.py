@@ -17,7 +17,7 @@ class JobPostingService:
         """
         self.linkedin_client = linkedin_client
     
-    def get_job_details(self, username: str, job_id: str) -> JobPostingInfo:
+    async def get_job_details(self, username: str, job_id: int) -> JobPostingInfo:
         """
         Get detailed information about a specific job posting.
         
@@ -28,5 +28,5 @@ class JobPostingService:
         Returns:
             JobPostingInfo object containing detailed job information
         """
-        return self.linkedin_client.get_job_posting_info(username, job_id)
+        return await self.linkedin_client.get_job_posting_info(username, job_id)
     
