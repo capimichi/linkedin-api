@@ -5,16 +5,16 @@ class Hirer(BaseModel):
     """
     Model representing detailed information about a hirer from LinkedIn.
     """
-    url: Optional[str] = None
+    slug: Optional[str] = None
     name: Optional[str] = None
     role: Optional[str] = None
 
-    def get_url(self) -> Optional[str]:
-        return self.url
-
-    def set_url(self, value: Optional[str]) -> None:
-        self.url = value
-
+    def get_slug(self) -> Optional[str]:
+        return self.slug
+    
+    def set_slug(self, value: Optional[str]) -> None:
+        self.slug = value
+        
     def get_name(self) -> Optional[str]:
         return self.name
 
