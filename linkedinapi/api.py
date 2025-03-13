@@ -15,6 +15,12 @@ app = FastAPI(
     title="LinkedIn API",
     description="API for interacting with LinkedIn data",
     version="1.0.0",
+    servers=[
+        {
+            "url": default_container.get_var('api_base_url'),
+            "description": "Server"
+        },
+    ]
 )
 
 # Root endpoint
