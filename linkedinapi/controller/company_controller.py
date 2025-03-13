@@ -1,5 +1,3 @@
-from typing import Optional
-
 from fastapi import APIRouter, HTTPException, Depends
 
 from linkedinapi.container.DefaultContainer import DefaultContainer
