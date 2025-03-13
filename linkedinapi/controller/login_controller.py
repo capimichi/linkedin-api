@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from injector import inject
 
 from linkedinapi.container.DefaultContainer import DefaultContainer
 from linkedinapi.service.LoginService import LoginService
+
 
 class LoginRequest(BaseModel):
     username: str
