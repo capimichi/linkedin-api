@@ -1,15 +1,12 @@
 from typing import Optional, List
 
 from fastapi import APIRouter, HTTPException, Depends
-from fastapi.security import HTTPAuthorizationCredentials
 
 from linkedinapi.container.DefaultContainer import DefaultContainer
-from linkedinapi.helper.TokenHelper import TokenHelper
+from linkedinapi.controller import get_current_username
+from linkedinapi.model.JobPostingInfo import JobPostingInfo
 from linkedinapi.model.JobPostingListingItem import JobPostingListingItem
 from linkedinapi.service.JobPostingService import JobPostingService
-from linkedinapi.model.JobPostingRequest import JobPostingRequest
-from linkedinapi.model.JobPostingInfo import JobPostingInfo
-from linkedinapi.controller import get_current_username
 
 job_posting_controller = APIRouter(
     prefix="/job-postings",
