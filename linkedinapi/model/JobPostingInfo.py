@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
+from linkedinapi.model.Company import Company
 from linkedinapi.model.Hirer import Hirer
 
 
@@ -11,8 +12,7 @@ class JobPostingInfo(BaseModel):
     """
     id: Optional[int] = None
     title: Optional[str] = None
-    company_name: Optional[str] = None
-    company_slug: Optional[str] = None
+    company: Optional[Company] = None
     location: Optional[str] = None
     description: Optional[str] = None
     skills: List[str] = []
