@@ -124,7 +124,7 @@ class LinkedinClient:
             await browser.close()
             return job_postings
 
-    async def get_job_posting_info(self, username: str, job_id: int) -> Optional[JobPostingInfo]:  # Return should be JobPostingInfo, needs import
+    async def get_job_posting(self, username: str, job_id: int) -> Optional[JobPostingInfo]:  # Return should be JobPostingInfo, needs import
         """
         Get detailed information about a specific job posting.
         
