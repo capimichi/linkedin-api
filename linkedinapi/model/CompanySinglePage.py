@@ -2,6 +2,7 @@ from typing import Optional
 
 from playwright.async_api import Page
 
+
 class CompanySinglePage:
     """
     A class to represent a single company page on LinkedIn.
@@ -29,6 +30,17 @@ class CompanySinglePage:
         except Exception:
             return None
 
+    async def get_slug(self) -> Optional[str]:
+        """
+        Get the company slug from the company page.
+
+        :return: Company slug as a string, or None if not found
+        """
+        try:
+            return self.page.url.split('company/')[1].split('/')[0]
+        except Exception:
+            return None
+
     async def get_description(self) -> Optional[str]:
         """
         Get the company description from the company page.
@@ -49,13 +61,25 @@ class CompanySinglePage:
 
         :return: Company website as a string, or None if not found
         """
-        website_selector = '.org-about-company-module__company-page-url'
+        main_dropdown_selector = '.org-top-card-overflow .artdeco-dropdown'
         try:
-            await self.page.wait_for_selector(website_selector, timeout=1000)
-            website_element = await self.page.query_selector(website_selector)
-            return (await website_element.inner_text()).strip()
+            await self.page.wait_for_selector(main_dropdown_selector, timeout=1000)
+
+            await self.page.click(main_dropdown_selector)
+
+            await self.page.wait_for_timeout(1000)
+
+            # loop .artdeco-dropdown__content-inner a
+            dropdown_items = await self.page.query_selector_all('.artdeco-dropdown__content-inner a')
+
+            # if a contains link-external-medium in its html then return the href
+            for item in dropdown_items:
+                if 'link-external-medium' in await item.inner_html():
+                    return await item.get_attribute('href')
         except Exception:
             return None
+
+        return None
 
     async def get_industry(self) -> Optional[str]:
         """
