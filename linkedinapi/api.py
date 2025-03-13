@@ -3,9 +3,10 @@ from fastapi import FastAPI
 from starlette.responses import RedirectResponse
 
 from linkedinapi.container.DefaultContainer import DefaultContainer
+from linkedinapi.controller.company_controller import company_controller
+from linkedinapi.controller.hirer_controller import hirer_controller
 from linkedinapi.controller.job_posting_controller import job_posting_controller
 from linkedinapi.controller.login_controller import login_controller
-from linkedinapi.controller.company_controller import company_controller
 
 default_container: DefaultContainer = DefaultContainer.getInstance()
 
@@ -31,6 +32,7 @@ async def health_check():
 app.include_router(login_controller)
 app.include_router(job_posting_controller)
 app.include_router(company_controller)
+app.include_router(hirer_controller)
 
 # Run the application (for development)
 if __name__ == "__main__":
