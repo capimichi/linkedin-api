@@ -1,14 +1,13 @@
-import json
 import logging
 import os
 
-from injector import Injector
 from dotenv import load_dotenv
+from injector import Injector
 
+from linkedinapi.client.LinkedinClient import LinkedinClient
+from linkedinapi.service.JobPostingService import JobPostingService
 from linkedinapi.variable.SecretKeyVariable import SecretKeyVariable
 from linkedinapi.variable.SessionDirVariable import SessionDirVariable
-from linkedinapi.service.JobPostingService import JobPostingService
-from linkedinapi.client.LinkedinClient import LinkedinClient
 
 
 class DefaultContainer:
