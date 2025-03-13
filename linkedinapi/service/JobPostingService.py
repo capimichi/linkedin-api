@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from injector import inject
+
 from linkedinapi.client.LinkedinClient import LinkedinClient
 from linkedinapi.model.JobPostingInfo import JobPostingInfo
 from linkedinapi.model.JobPostingListingItem import JobPostingListingItem
