@@ -51,6 +51,7 @@ class DefaultContainer:
         # self.pandoc_executable = os.environ.get('PANDOC_EXECUTABLE', 'pandoc')
         self.api_host = os.environ.get('API_HOST', '0.0.0.0')
         self.api_port = int(os.environ.get('API_PORT', 8000))
+        self.api_base_url = os.environ.get('API_BASE_URL', "http://" + self.api_host + ":" + str(self.api_port))
         self.secret_key = os.environ.get('SECRET_KEY')
 
     def _init_logging(self):
