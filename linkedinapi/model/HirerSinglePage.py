@@ -41,16 +41,30 @@ class HirerSinglePage:
         except Exception:
             return None
 
-    async def get_position(self) -> Optional[str]:
+    async def get_location(self) -> Optional[str]:
         """
-        Get the hirer position from the hirer page.
+        Get the hirer location from the hirer page.
 
-        :return: Hirer position as a string, or None if not found
+        :return: Hirer location as a string, or None if not found
         """
-        position_selector = '.pv-top-card--list li:nth-child(2)'
+        location_selector = '.text-body-small.inline.t-black--light.break-words'
         try:
-            await self.page.wait_for_selector(position_selector, timeout=1000)
-            position_element = await self.page.query_selector(position_selector)
-            return (await position_element.inner_text()).strip()
+            await self.page.wait_for_selector(location_selector, timeout=1000)
+            location_element = await self.page.query_selector(location_selector)
+            return (await location_element.inner_text()).strip()
+        except Exception:
+            return None
+
+    async def get_role(self) -> Optional[str]:
+        """
+        Get the hirer role from the hirer page.
+
+        :return: Hirer role as a string, or None if not found
+        """
+        role_selector = '.text-body-medium.break-words'
+        try:
+            await self.page.wait_for_selector(role_selector, timeout=1000)
+            role_element = await self.page.query_selector(role_selector)
+            return (await role_element.inner_text()).strip()
         except Exception:
             return None
