@@ -1,8 +1,9 @@
 from typing import List, Optional
+
 from playwright.async_api import Page
-from linkedinapi.model.JobPostingListingItem import JobPostingListingItem
+
 from linkedinapi.model.JobPostingSearchCard import JobPostingSearchCard
-import re
+
 
 class JobPostingSearchPage:
     def __init__(self, page: Page):
