@@ -202,6 +202,8 @@ class LinkedinClient:
             hirer_url = f"https://www.linkedin.com/in/{hirer_slug}/"
             await page.goto(hirer_url)
 
+            await page.wait_for_timeout(2000)
+
             hirer_single_page = HirerSinglePage(page)
             hirer_info = await HirerFactory.create_from_hirer_single_page(hirer_single_page)
 
