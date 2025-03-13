@@ -13,5 +13,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code into the container
 COPY . .
 
+RUN playwright install-deps
+
+RUN playwright install
+
 # Command to run the application
 CMD ["python", "-m", "linkedinapi.api"]
