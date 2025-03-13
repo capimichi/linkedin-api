@@ -1,7 +1,8 @@
+import re
 from typing import List
 
 from playwright.async_api import ElementHandle
-import re
+
 
 class JobPostingSearchCard:
     def __init__(self, element_handle: ElementHandle):
