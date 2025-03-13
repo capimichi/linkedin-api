@@ -7,15 +7,18 @@ from injector import inject
 from playwright.async_api import async_playwright
 from playwright.sync_api import sync_playwright
 
-from linkedinapi.factory.CompanyInfoFactory import CompanyFactory
+from linkedinapi.factory.CompanyFactory import CompanyFactory
+from linkedinapi.factory.HirerFactory import HirerFactory
 from linkedinapi.factory.JobPostingInfoFactory import JobPostingInfoFactory
 from linkedinapi.factory.JobPostingListingItemFactory import JobPostingListingItemFactory
 from linkedinapi.model.Company import Company
+from linkedinapi.model.CompanySinglePage import CompanySinglePage
+from linkedinapi.model.Hirer import Hirer
+from linkedinapi.model.HirerSinglePage import HirerSinglePage
 from linkedinapi.model.JobPostingInfo import JobPostingInfo
 from linkedinapi.model.JobPostingListingItem import JobPostingListingItem
 from linkedinapi.model.JobPostingSearchPage import JobPostingSearchPage
 from linkedinapi.model.JobPostingSinglePage import JobPostingSinglePage
-from linkedinapi.model.CompanySinglePage import CompanySinglePage
 from linkedinapi.variable.SessionDirVariable import SessionDirVariable
 
 
@@ -27,7 +30,7 @@ class LinkedinClient:
     and authenticate with LinkedIn using Playwright for browser automation.
     """
 
-    headless: bool = True
+    headless: bool = False
 
     @inject
     def __init__(self, session_dir: SessionDirVariable) -> None:
@@ -176,6 +179,32 @@ class LinkedinClient:
 
             await browser.close()
             return company_info
+
+    async def get_hirer(self, username: str, hirer_slug: str) -> Optional[Hirer]:
+        """
+        Get detailed information about a specific hirer.
+        
+        Args:
+            username: LinkedIn username to load browser session
+            hirer_slug: LinkedIn hirer slug
+            
+        Returns:
+            Hirer object containing detailed hirer information
+        """
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=self.headless)
+            session = await browser.new_context(storage_state=self.get_session_path(username))
+            page = await session.new_page()
+
+            # Navigate to hirer page
+            hirer_url = f"https://www.linkedin.com/in/{hirer_slug}/"
+            await page.goto(hirer_url)
+
+            hirer_single_page = HirerSinglePage(page)
+            hirer_info = await HirerFactory.create_from_hirer_single_page(hirer_single_page)
+
+            await browser.close()
+            return hirer_info
 
     def login(self, username: str, password: str) -> None:
         """
