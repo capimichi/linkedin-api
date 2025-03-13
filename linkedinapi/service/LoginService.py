@@ -1,4 +1,5 @@
 from injector import inject
+
 from linkedinapi.client.LinkedinClient import LinkedinClient
 from linkedinapi.helper.TokenHelper import TokenHelper
 from linkedinapi.manager.SecretManager import SecretManager
