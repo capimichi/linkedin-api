@@ -9,6 +9,7 @@ class Company(BaseModel):
     """
     slug: Optional[str] = None
     name: Optional[str] = None
+    website: Optional[str] = None
 
     def get_slug(self) -> Optional[str]:
         return self.slug
@@ -22,3 +23,8 @@ class Company(BaseModel):
     def set_name(self, value: Optional[str]) -> None:
         self.name = value
 
+    def get_website(self) -> Optional[str]:
+        return self.website
+
+    def set_website(self, value: Optional[str]) -> None:
+        self.website = value
