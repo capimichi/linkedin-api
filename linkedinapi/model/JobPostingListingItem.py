@@ -8,6 +8,7 @@ class JobPostingListingItem(BaseModel):
     id: Optional[str] = None
     title: Optional[str] = None
     company_name: Optional[str] = None
+    metadata: Optional[str] = None
     created_at: Optional[str] = None
     is_simple: bool = False
 
