@@ -1,3 +1,4 @@
+from linkedinapi.model.Company import Company
 from linkedinapi.model.JobPostingInfo import JobPostingInfo
 from linkedinapi.model.JobPostingSinglePage import JobPostingSinglePage
 
@@ -10,7 +11,13 @@ class JobPostingInfoFactory:
         job_posting_info.location = await job_posting_single_page.get_location()
         job_posting_info.description = await job_posting_single_page.get_description()
         job_posting_info.skills = await job_posting_single_page.get_skills() + await job_posting_single_page.get_additional_skills()
-        job_posting_info.company_name, job_posting_info.company_slug = await job_posting_single_page.get_company_info()
+        company_name, company_slug = await job_posting_single_page.get_company_info()
+
+        company = Company()
+        company.set_name(company_name)
+        company.set_slug(company_slug)
+        job_posting_info.company = company
+
         job_posting_info.disabled = await job_posting_single_page.is_disabled()
         job_posting_info.is_simple = await job_posting_single_page.is_simple_application()
         if not job_posting_info.is_simple:
