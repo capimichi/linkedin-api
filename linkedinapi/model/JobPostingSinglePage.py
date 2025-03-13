@@ -1,4 +1,5 @@
 from typing import List, Optional, Tuple
+
 from playwright.async_api import Page
 
 from linkedinapi.model.Hirer import Hirer
