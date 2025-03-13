@@ -7,12 +7,15 @@ from injector import inject
 from playwright.async_api import async_playwright
 from playwright.sync_api import sync_playwright
 
+from linkedinapi.factory.CompanyInfoFactory import CompanyFactory
 from linkedinapi.factory.JobPostingInfoFactory import JobPostingInfoFactory
 from linkedinapi.factory.JobPostingListingItemFactory import JobPostingListingItemFactory
+from linkedinapi.model.Company import Company
 from linkedinapi.model.JobPostingInfo import JobPostingInfo
 from linkedinapi.model.JobPostingListingItem import JobPostingListingItem
 from linkedinapi.model.JobPostingSearchPage import JobPostingSearchPage
 from linkedinapi.model.JobPostingSinglePage import JobPostingSinglePage
+from linkedinapi.model.CompanySinglePage import CompanySinglePage
 from linkedinapi.variable.SessionDirVariable import SessionDirVariable
 
 
@@ -147,6 +150,32 @@ class LinkedinClient:
 
             await browser.close()
             return job_posting_info
+
+    async def get_company(self, username: str, company_slug: str) -> Optional[Company]:
+        """
+        Get detailed information about a specific company.
+        
+        Args:
+            username: LinkedIn username to load browser session
+            company_slug: LinkedIn company slug
+            
+        Returns:
+            CompanyInfo object containing detailed company information
+        """
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=self.headless)
+            session = await browser.new_context(storage_state=self.get_session_path(username))
+            page = await session.new_page()
+
+            # Navigate to company page
+            company_url = f"https://www.linkedin.com/company/{company_slug}/"
+            await page.goto(company_url)
+
+            company_single_page = CompanySinglePage(page)
+            company_info = await CompanyFactory.create_from_company_single_page(company_single_page)
+
+            await browser.close()
+            return company_info
 
     def login(self, username: str, password: str) -> None:
         """
