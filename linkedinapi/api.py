@@ -1,13 +1,10 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel
 import uvicorn
+from fastapi import FastAPI
 from starlette.responses import RedirectResponse
 
 from linkedinapi.container.DefaultContainer import DefaultContainer
-from linkedinapi.controller.login_controller import login_controller
 from linkedinapi.controller.job_posting_controller import job_posting_controller
+from linkedinapi.controller.login_controller import login_controller
 
 default_container: DefaultContainer = DefaultContainer.getInstance()
 
