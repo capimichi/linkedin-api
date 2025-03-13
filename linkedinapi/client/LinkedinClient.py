@@ -206,7 +206,7 @@ class LinkedinClient:
             await browser.close()
             return hirer_info
 
-    def login(self, username: str, password: str) -> None:
+    async def login(self, username: str, password: str) -> None:
         """
         Login to LinkedIn using provided credentials.
         
@@ -219,23 +219,22 @@ class LinkedinClient:
         if self._is_already_logged_in(username):
             return
         
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=self.headless)
-            session = browser.new_context(storage_state=self.get_session_path(username))
-            page = session.new_page()
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=self.headless)
+            session = await browser.new_context(storage_state=self.get_session_path(username))
+            page = await session.new_page()
             
             # Navigate to login page
-            page.goto("https://www.linkedin.com/login")
+            await page.goto("https://www.linkedin.com/login")
             
             # Fill in credentials and submit
-            page.fill("input#username", username)
-            page.fill("input#password", password)
-            page.click("button[type=submit]")
+            await page.fill("input#username", username)
+            await page.fill("input#password", password)
+            await page.click("button[type=submit]")
             
             # Wait for login to complete
-            page.wait_for_timeout(50000)
+            await page.wait_for_timeout(50000)
             
             # Save session state for future use
-            page.context.storage_state(path=self.get_session_path(username))
-            browser.close()
-
+            await page.context.storage_state(path=self.get_session_path(username))
+            await browser.close()
