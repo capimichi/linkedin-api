@@ -26,7 +26,7 @@ class LinkedinClient:
     and authenticate with LinkedIn using Playwright for browser automation.
     """
 
-    headless: bool = False
+    headless: bool = True
 
     @inject
     def __init__(self, session_dir: SessionDirVariable) -> None:
