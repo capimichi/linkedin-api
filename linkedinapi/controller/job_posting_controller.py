@@ -12,13 +12,13 @@ from linkedinapi.model.JobPostingInfo import JobPostingInfo
 from linkedinapi.controller import get_current_username
 
 job_posting_controller = APIRouter(
-    prefix="/jobs",
-    tags=["jobs"],
+    prefix="/job-postings",
+    tags=["Job postings"],
 )
 
 
 @job_posting_controller.get("/{job_id}")
-async def get_job_details(job_id: int, username: str = Depends(get_current_username)) -> JobPostingInfo:
+async def get_job_posting(job_id: int, username: str = Depends(get_current_username)) -> JobPostingInfo:
     """
     Get detailed information about a specific job posting.
     
@@ -34,7 +34,7 @@ async def get_job_details(job_id: int, username: str = Depends(get_current_usern
     job_posting_service: JobPostingService = default_container.get(JobPostingService)
 
     try:
-        job_details = await job_posting_service.get_job_details(username, job_id)
+        job_details = await job_posting_service.get_job_posting(username, job_id)
         return job_details
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving job details: {str(e)}")
