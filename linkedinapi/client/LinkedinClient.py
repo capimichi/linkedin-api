@@ -1,22 +1,20 @@
-import asyncio
+import json
+import os
+import time
+from typing import List, Optional
 
 from injector import inject
-from typing import List, Optional, Any
-
 from playwright.async_api import async_playwright
+from playwright.sync_api import sync_playwright
 
+from linkedinapi.factory.JobPostingInfoFactory import JobPostingInfoFactory
+from linkedinapi.factory.JobPostingListingItemFactory import JobPostingListingItemFactory
 from linkedinapi.model.JobPostingInfo import JobPostingInfo
 from linkedinapi.model.JobPostingListingItem import JobPostingListingItem
-from linkedinapi.variable.SessionDirVariable import SessionDirVariable
-from playwright.sync_api import sync_playwright, Browser, BrowserContext, Page
-import os
-import re
-import json
-import time
-from linkedinapi.model.JobPostingSinglePage import JobPostingSinglePage
-from linkedinapi.factory.JobPostingInfoFactory import JobPostingInfoFactory
 from linkedinapi.model.JobPostingSearchPage import JobPostingSearchPage
-from linkedinapi.factory.JobPostingListingItemFactory import JobPostingListingItemFactory
+from linkedinapi.model.JobPostingSinglePage import JobPostingSinglePage
+from linkedinapi.variable.SessionDirVariable import SessionDirVariable
+
 
 class LinkedinClient:
     """
