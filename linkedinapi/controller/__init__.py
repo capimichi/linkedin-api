@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer, HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from linkedinapi.container.DefaultContainer import DefaultContainer
 from linkedinapi.helper.TokenHelper import TokenHelper
