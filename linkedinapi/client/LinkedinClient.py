@@ -174,6 +174,8 @@ class LinkedinClient:
             company_url = f"https://www.linkedin.com/company/{company_slug}/"
             await page.goto(company_url)
 
+            await page.wait_for_timeout(2000)
+
             company_single_page = CompanySinglePage(page)
             company_info = await CompanyFactory.create_from_company_single_page(company_single_page)
 
