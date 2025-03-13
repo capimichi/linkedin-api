@@ -7,5 +7,6 @@ class HirerFactory:
         hirer_info = Hirer()
         hirer_info.name = await hirer_single_page.get_name()
         hirer_info.slug = await hirer_single_page.get_slug()
-        hirer_info.position = await hirer_single_page.get_position()
+        hirer_info.location = await hirer_single_page.get_location()
+        hirer_info.role = await hirer_single_page.get_role()
         return hirer_info
