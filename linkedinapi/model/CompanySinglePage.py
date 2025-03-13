@@ -77,7 +77,18 @@ class CompanySinglePage:
                 if 'link-external-medium' in await item.inner_html():
                     return await item.get_attribute('href')
         except Exception:
-            return None
+            pass
+
+        main_buttonbar_link_selector = '.org-top-card-primary-actions__inner a'
+
+        try:
+            await self.page.wait_for_selector(main_buttonbar_link_selector, timeout=1000)
+            main_buttonbar_link_elements = await self.page.query_selector_all(main_buttonbar_link_selector)
+            for element in main_buttonbar_link_elements:
+                if 'org-top-card-primary-actions__external-link' in await element.inner_html():
+                    return await element.get_attribute('href')
+        except Exception:
+            pass
 
         return None
 
