@@ -9,7 +9,8 @@ class Hirer(BaseModel):
     """
     slug: Optional[str] = None
     name: Optional[str] = None
-    position: Optional[str] = None
+    location: Optional[str] = None
+    role: Optional[str] = None
 
     def get_slug(self) -> Optional[str]:
         return self.slug
@@ -23,9 +24,15 @@ class Hirer(BaseModel):
     def set_name(self, value: Optional[str]) -> None:
         self.name = value
 
-    def get_position(self) -> Optional[str]:
-        return self.position
+    def get_location(self) -> Optional[str]:
+        return self.location
 
-    def set_position(self, value: Optional[str]) -> None:
-        self.position = value
+    def set_location(self, value: Optional[str]) -> None:
+        self.location = value
+
+    def get_role(self) -> Optional[str]:
+        return self.role
+
+    def set_role(self, value: Optional[str]) -> None:
+        self.role = value
 
