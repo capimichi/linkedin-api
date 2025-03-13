@@ -5,6 +5,7 @@ from starlette.responses import RedirectResponse
 from linkedinapi.container.DefaultContainer import DefaultContainer
 from linkedinapi.controller.job_posting_controller import job_posting_controller
 from linkedinapi.controller.login_controller import login_controller
+from linkedinapi.controller.company_controller import company_controller
 
 default_container: DefaultContainer = DefaultContainer.getInstance()
 
@@ -29,6 +30,7 @@ async def health_check():
 # Include routers
 app.include_router(login_controller)
 app.include_router(job_posting_controller)
+app.include_router(company_controller)
 
 # Run the application (for development)
 if __name__ == "__main__":
