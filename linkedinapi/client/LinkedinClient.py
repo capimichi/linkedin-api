@@ -15,6 +15,8 @@ import json
 import time
 from linkedinapi.model.JobPostingSinglePage import JobPostingSinglePage
 from linkedinapi.factory.JobPostingInfoFactory import JobPostingInfoFactory
+from linkedinapi.model.JobPostingSearchPage import JobPostingSearchPage
+from linkedinapi.factory.JobPostingListingItemFactory import JobPostingListingItemFactory
 
 class LinkedinClient:
     """
@@ -24,7 +26,7 @@ class LinkedinClient:
     and authenticate with LinkedIn using Playwright for browser automation.
     """
 
-    headless: bool = True
+    headless: bool = False
 
     @inject
     def __init__(self, session_dir: SessionDirVariable) -> None:
@@ -81,15 +83,7 @@ class LinkedinClient:
         
         return False
 
-
-
-    def search(self, username: str, query: str, location: str, limit_first_page: bool = False, 
-               filter_date: Optional[int] = None) -> List[JobPostingListingItem]:
-        loop = asyncio.get_event_loop()
-        return loop.run_until_complete(self._search(username, query, location, limit_first_page, filter_date))
-
-
-    async def _search(self, username: str, query: str, location: str, limit_first_page: bool = False,
+    async def search(self, username: str, query: str, location: str, limit_first_page: bool = False,
                filter_date: Optional[int] = None) -> List[JobPostingListingItem]:
         """
         Search for job listings on LinkedIn with specified criteria.
@@ -109,117 +103,23 @@ class LinkedinClient:
             session = await browser.new_context(storage_state=self.get_session_path(username))
             page = await session.new_page()
 
-            # Navigate to LinkedIn jobs page
-            jobs_url = "https://www.linkedin.com/jobs/"
-            await page.goto(jobs_url)
+            job_search_page = JobPostingSearchPage(page)
+            await job_search_page.search_jobs(query, location, filter_date)
 
-            # Fill in job search query
-            search_selector = 'input[aria-label="Cerca per qualifica, competenza o azienda"]'
-            await page.wait_for_selector(search_selector)
-            await page.fill(search_selector, query)
-
-            await page.wait_for_timeout(500)
-
-            # Fill in location
-            location_selector = 'input[aria-label="Città, stato o CAP"]'
-            await page.wait_for_selector(location_selector)
-            await page.fill(location_selector, location)
-
-            await page.wait_for_timeout(500)
-
-            # Submit search
-            await page.keyboard.press('Enter')
-            await page.wait_for_timeout(5000)
-
-            # Apply date filter if specified
-            if filter_date:
-                # Click on the date filter dropdown
-                await page.click("#searchFilter_timePostedRange")
-                await page.wait_for_timeout(1500)
-
-                # Navigate to the filter options
-                for i in range(2):
-                    await page.keyboard.press('Tab')
-                    await page.wait_for_timeout(500)
-
-                # Select the appropriate date filter option
-                for i in range(filter_date):
-                    await page.keyboard.press('ArrowDown')
-                    await page.wait_for_timeout(500)
-
-                # Apply the filter
-                for i in range(2):
-                    await page.keyboard.press('Tab')
-                    await page.wait_for_timeout(500)
-
-                await page.keyboard.press('Enter')
-                await page.wait_for_timeout(1500)
-
-            has_next_page = True
             job_postings = []
-            
-            # Iterate through all result pages
+            has_next_page = True
+
             while has_next_page:
-                # Scroll inside the job listings container to load all jobs
-                scroll_container_selector = '.scaffold-layout__list'
-                await page.wait_for_selector(scroll_container_selector)
-                scroll_container_x = (await page.query_selector(scroll_container_selector)).bounding_box()['x']
-                scroll_container_y = (await page.query_selector(scroll_container_selector)).bounding_box()['y']
-
-                await page.mouse.move(scroll_container_x + 100, scroll_container_y + 100)
-                await page.wait_for_timeout(1500)
-
-                # Scroll down multiple times to ensure all content is loaded
-                for i in range(8):
-                    await page.mouse.wheel(0, 400)
-                    await page.wait_for_timeout(500)
-
-                # Select job card elements
-                job_card_selector = '.job-card-container'
-                job_footer_item_selector = '.job-card-container__footer-item time'
-                            
-                await page.wait_for_selector(job_card_selector)
-                await page.wait_for_selector(job_footer_item_selector)
-                
-                job_cards = await page.query_selector_all(job_card_selector)
-
-                # Extract data from each job card
+                job_cards = await job_search_page.get_job_cards()
                 for job_card in job_cards:
-                    job_posting = JobPostingListingItem()
-                    
-                    # Extract job ID
-                    job_id = await job_card.get_attribute('data-job-id')
-                    job_posting.id = job_id
-                    
-                    # Extract job title
-                    job_title = (await job_card.query_selector('strong')).inner_text().strip()
-                    job_posting.title = job_title
-
-                    # Extract company name
-                    job_company = (await job_card.query_selector('.artdeco-entity-lockup__subtitle')).inner_text().strip()
-                    job_posting.company_name = job_company
-
-                    # Extract datetime using regex
-                    match = re.search(r'<time datetime="(.*?)"', await job_card.inner_html())
-                    if match:
-                        job_date = match.group(1)
-                        job_posting.created_at = job_date
-
-                    # Check if the job has simple application
-                    is_simple = (await job_card.inner_text()).find('Candidatura semplice') != -1
-                    job_posting.is_simple = is_simple
-
+                    job_posting = await JobPostingListingItemFactory.create_from_job_posting_search_card(job_card)
                     job_postings.append(job_posting)
-
-                # Check if there is a next page or stop if limited to first page
                 if limit_first_page:
                     has_next_page = False
                 else:
-                    next_page_selector = 'button[aria-label="Visualizza pagina successiva"]'
-                    has_next_page = await page.query_selector(next_page_selector) is not None
+                    has_next_page = await job_search_page.has_next_page()
                     if has_next_page:
-                        await page.click(next_page_selector)
-                        await page.wait_for_timeout(1000)
+                        await job_search_page.go_to_next_page()
 
             await browser.close()
             return job_postings
