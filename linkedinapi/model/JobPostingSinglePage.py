@@ -203,9 +203,11 @@ class JobPostingSinglePage:
                 link = (await link_element.get_attribute('href')) if link_element else None
                 role = (await role_element.inner_text()).strip() if role_element else None
 
+                slug = link.split('in/')[1].split('/')[0] if link else None
+
                 hirer = Hirer()
                 hirer.set_name(name)
-                hirer.set_url(link)
+                hirer.set_slug(slug)
                 hirer.set_role(role)
 
                 hirers.append(hirer)
