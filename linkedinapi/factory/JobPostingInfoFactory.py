@@ -15,4 +15,6 @@ class JobPostingInfoFactory:
         job_posting_info.is_simple = await job_posting_single_page.is_simple_application()
         if not job_posting_info.is_simple:
             job_posting_info.external_url = await job_posting_single_page.get_external_url()
+
+        job_posting_info.hirers = await job_posting_single_page.get_hirers()
         return job_posting_info
