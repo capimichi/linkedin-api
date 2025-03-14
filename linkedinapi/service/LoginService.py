@@ -12,7 +12,7 @@ class LoginService:
         self.linkedin_client = linkedin_client
         self.secret_manager = secret_manager
         
-    def login(self, username: str, password: str):
+    async def login(self, username: str, password: str):
         """
         Login to LinkedIn using provided credentials and generate a token.
         
@@ -24,7 +24,7 @@ class LoginService:
             A dictionary containing the login status and token
         """
         try:
-            self.linkedin_client.login(username, password)
+            await self.linkedin_client.login(username, password)
             token = TokenHelper.generate_token(
                 username,
                 self.secret_manager.get_secret_key(),
