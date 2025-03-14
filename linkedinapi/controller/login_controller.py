@@ -19,4 +19,4 @@ async def login(login_request: LoginRequest):
     default_container: DefaultContainer = DefaultContainer.getInstance()
     login_service: LoginService = default_container.get(LoginService)
     
-    return login_service.login(login_request.username, login_request.password)
+    return await login_service.login(login_request.username, login_request.password)
