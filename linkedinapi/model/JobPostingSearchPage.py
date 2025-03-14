@@ -13,6 +13,10 @@ class JobPostingSearchPage:
         jobs_url = "https://www.linkedin.com/jobs/search"
         await self.page.goto(jobs_url)
 
+        await self.page.wait_for_timeout(1000)
+
+        await self.page.click('[type="job-active"]')
+
         search_selector = 'input[aria-label="Cerca per qualifica, competenza o azienda"]'
         await self.page.wait_for_selector(search_selector)
         await self.page.fill(search_selector, query)
