@@ -5,7 +5,6 @@ from typing import List, Optional
 
 from injector import inject
 from playwright.async_api import async_playwright
-from playwright.sync_api import sync_playwright
 
 from linkedinapi.factory.CompanyFactory import CompanyFactory
 from linkedinapi.factory.HirerFactory import HirerFactory
@@ -222,7 +221,7 @@ class LinkedinClient:
         """
         if self._is_already_logged_in(username):
             return
-        
+
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=self.headless)
             session = await browser.new_context(storage_state=self.get_session_path(username))
